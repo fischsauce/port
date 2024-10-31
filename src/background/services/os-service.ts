@@ -1,4 +1,4 @@
-import { HandlerEntry } from '../server/ipc';
+import {Handler, HandlerEntry} from '../server/ipc';
 import { ipcRenderer as ipc} from 'electron'
 
 export interface OSHandlers {
@@ -17,16 +17,16 @@ export interface OSHandlers {
 export class OSService {
     handlers(): HandlerEntry<OSHandlers>[] {
         return [
-            { name: 'quit', handler: this.quit.bind(this) },
-            { name: 'get-directory', handler: this.getDirectory.bind(this) },
-            { name: 'get-file', handler: this.getFile.bind(this) },
-            { name: 'set-title', handler: this.setTitle.bind(this) },
-            { name: 'clear-data', handler: this.clearData.bind(this) },
-            { name: 'toggle-dev-tools', handler: this.toggleDevTools.bind(this) },
-            { name: 'create-view', handler: this.createView.bind(this) },
-            { name: 'update-view-bounds', handler: this.updateViewBounds.bind(this) },
-            { name: 'remove-view', handler: this.removeView.bind(this) },
-            { name: 'install-updates', handler: this.installUpdates.bind(this) }
+            { name: 'quit', handler: this.quit.bind(this) as Handler},
+            { name: 'get-directory', handler: this.getDirectory.bind(this) as Handler},
+            { name: 'get-file', handler: this.getFile.bind(this) as Handler},
+            { name: 'set-title', handler: this.setTitle.bind(this) as Handler},
+            { name: 'clear-data', handler: this.clearData.bind(this) as Handler},
+            { name: 'toggle-dev-tools', handler: this.toggleDevTools.bind(this) as Handler },
+            { name: 'create-view', handler: this.createView.bind(this)  as Handler},
+            { name: 'update-view-bounds', handler: this.updateViewBounds.bind(this)  as Handler},
+            { name: 'remove-view', handler: this.removeView.bind(this)  as Handler},
+            { name: 'install-updates', handler: this.installUpdates.bind(this)  as Handler}
         ]
     }
 

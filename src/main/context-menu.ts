@@ -7,7 +7,7 @@ export function initContextMenu(createNewWindow, createNewTab, mainUrl, window?)
   const options: contextMenu.Options = {
     showInspectElement: isDev,
     prepend: (actions, params, window) => {
-      const items = [];
+      let items;
       const showOpenLink = !params.pageURL.startsWith(mainUrl)
 
       if (params.linkURL && showOpenLink) {

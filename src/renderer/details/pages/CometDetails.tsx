@@ -4,6 +4,7 @@ import { DetailsContainer } from '../components/DetailsContainer'
 import { NameField } from '../components/NameField'
 import { AdvancedOptions } from '../components/AdvancedOptions'
 import { useAddPier } from '../useAddPier'
+import {AddPier} from "../../../background/services/pier-service";
 
 export const CometDetails: React.FC = () => {
     const {

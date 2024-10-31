@@ -38,7 +38,7 @@ export function updateZoomLevels(mainWindow: BrowserWindow) {
   }
 
   const main = Math.trunc(mainWindow.webContents.zoomFactor * 10) / 10;
-  const viewLevels = [];
+  let viewLevels;
   views.forEach(view => {
     viewLevels.push(Math.trunc(view.webContents.zoomFactor * 10) / 10)
   })
@@ -50,6 +50,9 @@ export function updateZoomLevels(mainWindow: BrowserWindow) {
 
 function adjustZoom(mainWindow: BrowserWindow, adjuster: (contents: WebContents) => void): void {
     const focusedWindow = BrowserWindow.getFocusedWindow();
+
+    if (focusedWindow == null) return;
+
     const view = focusedWindow.getBrowserView();
     
     if (focusedWindow === mainWindow && view) {
@@ -87,7 +90,7 @@ export function createMainWindow(
     ...DEFAULT_WINDOW_OPTIONS,
     width: mainWindowState.width,
     height: mainWindowState.height,
-    titleBarStyle: getPlatform() === 'mac' ? 'hidden' : null,
+    titleBarStyle: getPlatform() === 'mac' ? 'hidden' : undefined,
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#000000' : '#FFFFFF',
     //icon: getAppIcon(),
     webPreferences: {
@@ -158,15 +161,17 @@ export function createMainWindow(
   };
 
   const getCurrentUrl = (): string =>
-    withFocusedView((contents) => contents.getURL());
+    <string>withFocusedView((contents) => contents.getURL());
 
   const onWillNavigate = (event: Event, webContents: WebContents, urlTarget: string): void => {
     isDev && console.log('will-navigate', urlTarget)
     onNavigation({
-      preventDefault: event.preventDefault,
+      urlTarget: urlTarget,
       currentUrl: webContents.getURL(),
-      urlTarget,
-      mainWindow
+      preventDefault: event.preventDefault,
+      createNewWindow: null,
+      mainWindow: mainWindow,
+      partition: undefined
     })
   };
 

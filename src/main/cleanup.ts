@@ -3,8 +3,8 @@ import { app, BrowserWindow, ipcMain } from "electron";
 export class Cleanup {
     finished: boolean;
     started: boolean;
-    private mainWindow: BrowserWindow;
-    private bgWindow: BrowserWindow;
+    private mainWindow: BrowserWindow | undefined;
+    private bgWindow: BrowserWindow | undefined;
 
     constructor() {
         this.started = false;
@@ -27,27 +27,27 @@ export class Cleanup {
         this.started = true;
         try {
             // acknowledge cleanup in UI
-            this.mainWindow.webContents.send('cleanup');
+            this.mainWindow?.webContents.send('cleanup');
             const allWindows = BrowserWindow.getAllWindows();
             allWindows.forEach(window => {
                 if (window !== this.mainWindow && window !== this.bgWindow && !window.isDestroyed()) {
                     window.destroy();
                 }
             })
-            this.mainWindow.focus();
+            this.mainWindow?.focus();
             
             // clean up background
-            this.bgWindow.webContents.send('cleanup')
+            this.bgWindow?.webContents.send('cleanup')
             ipcMain.on('cleanup-done', (e) => {
-                this.bgWindow.destroy();
-                this.mainWindow.destroy();
+                this.bgWindow?.destroy();
+                this.mainWindow?.destroy();
                 this.finished = true;
                 console.log('Cleanup complete.');
                 app.quit();
             })
-        } catch (err) {
+        } catch (err: any) {
             console.log('Cleanup failed.')
-            console.error(err.message)
+            console.error(err?.message)
             return true; // despite failing, we shouldn't require the user to force quit
         }
 

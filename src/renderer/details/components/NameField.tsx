@@ -6,7 +6,7 @@ import { send } from '../../client/ipc';
 import { pierKey } from '../../query-keys';
 
 interface NameFieldProps {
-    form: UseFormMethods<AddPier | UpdatePier>
+    form: UseFormMethods<AddPier> | UseFormMethods<UpdatePier>
 }
 
 export const NameField: React.FC<NameFieldProps> = ({ form }) => {
@@ -20,18 +20,19 @@ export const NameField: React.FC<NameFieldProps> = ({ form }) => {
     const nameNotUnique = form.errors.name?.type === 'validate';
     const nameContainsInvalidCharacters = form.errors.name?.type === 'pattern';
 
-    return (
+  // @ts-ignore
+  return (
         <>
             <input 
                 id="name" 
                 name="name" 
                 type="text"
-                ref={form.register({ 
-                    required: true,
-                    pattern: namePattern,
-                    validate: nameValidator,
-                    maxLength: 64 
-                })}
+                // ref={form.register({
+                //     required: true,
+                //     pattern: namePattern,
+                //     validate: nameValidator,
+                //     maxLength: 64
+                // })}
                 className="input flex w-full mt-2"
                 placeholder="My Ship"
                 aria-invalid={!!form.errors.name}

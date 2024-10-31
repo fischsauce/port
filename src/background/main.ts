@@ -20,11 +20,11 @@ export type Handlers =
 async function start() {
     const handlerMap: HandlerMap<Handlers> = {} as HandlerMap<Handlers>;
     const osService = new OSService();
-    const pierService = new PierService(db);
+    // const pierService = new PierService(db);
     const settingsService = new SettingsService(db);
 
     addHandlers(handlerMap, osService.handlers());
-    addHandlers(handlerMap, pierService.handlers());
+    // addHandlers(handlerMap, pierService.handlers());
     addHandlers(handlerMap, settingsService.handlers());
 
     ipcRenderer.on('set-socket', (event, { name }) => {
@@ -34,8 +34,16 @@ async function start() {
       architectureSupportCheck();
     })
 
-    await pierService.start();
+    if (await db.piers.asyncCount({}) as number > 1) {
+        //TODO: prompt?
+        console.log('found no piers in db')
+    }
+    else {
+        const pierService = new PierService(db);
+        addHandlers(handlerMap, pierService.handlers());
 
+        await pierService.start();
+    }
     console.log('initializing background process')
 }
 

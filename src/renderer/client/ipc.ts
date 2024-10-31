@@ -1,5 +1,5 @@
 import { Client } from 'node-ipc'
-import { ClientMessage, Reply, Error, ServerMessage } from '../../background/server/ipc'
+import {ClientMessage, Reply, Error, ServerMessage, Handler} from '../../background/server/ipc'
 import { v4 } from 'uuid'
 import { Handlers } from '../../background/main';
 
@@ -28,8 +28,9 @@ export async function init(): Promise<void> {
 const replyHandlers = new Map<string, ReplyHandler>()
 const listeners = new Map<string, Listener[]>()
 let serverConnected = false;
-let messageQueue: Stringified<ServerMessage<Handlers>>[] = []
-let socketClient: Client = null
+// let messageQueue: Stringified<ServerMessage<Handler>>[];
+let messageQueue: Stringified<ServerMessage<Handlers>>[] = [];
+let socketClient: Client | null;
 
 // Functions
 export async function connectSocket(name: string): Promise<void> {
@@ -67,7 +68,7 @@ function onMessage(data: string): void {
     }
 }
 
-function handleResponse(handler: ReplyHandler, msg: Reply | Error): void {
+function handleResponse(handler: ReplyHandler | undefined, msg: Reply | Error): void {
     if (!handler)
         return;
 

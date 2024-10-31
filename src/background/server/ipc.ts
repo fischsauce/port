@@ -62,7 +62,7 @@ function noHandle<T extends HandlerMap<T>>({ id, name }: ServerMessage<T>, socke
     const reply: Reply = { type: 'reply', id, result: null };
 
     ipc.server.emit(socket, 'message', JSON.stringify(reply))
-    console.warn('Unknown method: ' + name)
+    console.warn('Unknown method: ' + name.toString)
 }
 
 function serve<T extends HandlerMap<T>>(handlers: HandlerMap<T>) {

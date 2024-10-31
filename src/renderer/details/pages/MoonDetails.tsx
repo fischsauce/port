@@ -16,7 +16,7 @@ export const MoonDetails: React.FC = () => {
     const {
         form,
         mutate
-    } = useAddPier((data: AddPier | NewMoon) => {
+    } = useAddPier((data: AddPier) => {
         return send('add-pier', {...data, type: 'moon' })
         // return isNewMoon(data) && data.planet && tab === 'from-planet'
         //     ? send('generate-moon', data)

@@ -89,7 +89,7 @@ interface onNavigationParameters {
   preventDefault: (newWindow?: BrowserWindow) => void;
   currentUrl: string; 
   urlTarget: string;
-  createNewWindow?: (url: string, partition?: string | Session) => BrowserWindow;
+  createNewWindow: (url: string, partition?: string | Session) => BrowserWindow;
   mainWindow: BrowserWindow;
   partition?: string | Session;
 }
@@ -101,7 +101,15 @@ function matchView(view: BrowserWindow | BrowserView, targetUrl: URL) {
   return targetUrl.pathname === path;
 }
 
-export function onNavigation({ urlTarget, currentUrl, preventDefault, createNewWindow, mainWindow, partition }: onNavigationParameters) {
+export function onNavigation(
+  {
+    urlTarget,
+    currentUrl,
+    preventDefault,
+    createNewWindow,
+    mainWindow,
+    partition
+  }: onNavigationParameters) {
   const url = new URL(currentUrl);
   let targetUrl = new URL(urlTarget);
   const isProtocolLink = targetUrl.protocol.startsWith(URBIT_PROTOCOL);
@@ -146,7 +154,7 @@ export function onNavigation({ urlTarget, currentUrl, preventDefault, createNewW
     isDev && console.log(urlTarget, 'have window, focusing');
     preventDefault();
     (targetWindow || mainWindow).focus();
-    (targetWindow || targetView).webContents.loadURL(targetUrl.toString());
+    (targetWindow || targetView)?.webContents.loadURL(targetUrl.toString());
     return;
   }
 
@@ -166,8 +174,8 @@ export function leap(mainWindow: BrowserWindow) {
   }
 
   const isLandscape = focusedWindow?.webContents.getURL().includes('/apps/landscape');
-  const contents = isLandscape ? focusedWindow.webContents : mainView.webContents;
-  showWindow(isLandscape ? focusedWindow : mainWindow);
+  const contents = isLandscape && focusedWindow !== null ? focusedWindow.webContents : mainView.webContents;
+  showWindow(isLandscape && focusedWindow !== null ? focusedWindow : mainWindow);
 
   setTimeout(() => {
     contents.focus();

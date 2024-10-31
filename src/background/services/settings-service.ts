@@ -1,4 +1,4 @@
-import { HandlerEntry } from '../server/ipc';
+import {Handler, HandlerEntry} from '../server/ipc';
 import { ipcRenderer as ipc} from 'electron'
 import { DB, Settings, SettingsDocument } from '../db';
 import { each } from 'async';
@@ -28,9 +28,9 @@ export class SettingsService {
 
   handlers(): HandlerEntry<SettingsHandlers>[] {
       return [
-          { name: 'get-settings', handler: this.getSettings.bind(this) },
-          { name: 'set-setting', handler: this.setSetting.bind(this) },
-          { name: 'refresh-settings', handler: this.refreshSettings.bind(this) }
+          { name: 'get-settings', handler: this.getSettings.bind(this) as Handler},
+          { name: 'set-setting', handler: this.setSetting.bind(this) as Handler},
+          { name: 'refresh-settings', handler: this.refreshSettings.bind(this) as Handler}
       ]
   }
 
@@ -60,7 +60,7 @@ export class SettingsService {
 
   private async sendUpdate() {
     const settings = await this.getSettings();
-    await ipc.invoke('update-settings', settings.reduce((map, setting) => {
+    await ipc.invoke('update-settings', settings?.reduce((map, setting) => {
         map[setting.name] = setting.value;
         return map;
     }, {}) as Record<Settings, string>)

@@ -23,3 +23,4 @@ rm linux-x86_64.tgz
 curl -JLO https://urbit.org/install/linux-aarch64/latest
 tar -xzvf linux-aarch64.tgz
 rm linux-aarch64.tgz
+

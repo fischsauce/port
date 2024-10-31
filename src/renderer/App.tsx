@@ -68,9 +68,9 @@ export const useStore = create<PortStore>(() => ({
 const AppWrapped = () => (
     <QueryClientProvider client={queryClient}>
         <HashRouter>
-            <ErrorBoundary fallbackRender={ErrorPage}>
+            {/*<ErrorBoundary fallbackRender={ErrorPage}>*/}
                 <App />
-            </ErrorBoundary>
+            {/*</ErrorBoundary>*/}
         </HashRouter>
     </QueryClientProvider>
 )

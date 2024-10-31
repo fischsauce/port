@@ -92,7 +92,7 @@ function createBackgroundWindow(socketName: string) {
   return win;
 }
 
-async function start(bootBg: boolean) {
+async function start(this: any, bootBg: boolean) {
   const serverSocket = await findOpenSocket()
 
   isDev && console.log('server socket', serverSocket)

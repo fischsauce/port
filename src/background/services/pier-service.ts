@@ -4,7 +4,7 @@ import { exec, spawn, ChildProcessWithoutNullStreams } from 'child_process';
 import { shell, ipcRenderer } from 'electron';
 import axios from 'axios'
 import { DB } from '../db'
-import { HandlerEntry } from '../server/ipc';
+import {Handler, HandlerEntry} from '../server/ipc';
 import { getPlatform, getPlatformPathSegments } from '../../get-platform';
 import { rootPath as root } from 'electron-root-path';
 import appRootDir from 'app-root-dir'
@@ -51,9 +51,9 @@ type BootingPier = Promise<Pier | null> & { recoveryAttempted?: boolean }
 
 export class PierService {
     private readonly db: DB;
-    private urbitPath: string;
+    private urbitPath = "";
     private readonly bootingPiers: Map<string, BootingPier>;
-    private pierDirectory: string;
+    private pierDirectory = "";
 
     constructor(db: DB) {
         this.db = db;
@@ -72,22 +72,22 @@ export class PierService {
 
     handlers(): HandlerEntry<PierHandlers>[] {
         return [
-            { name: 'add-pier', handler: this.addPier.bind(this) },
-            { name: 'get-pier', handler: this.getPier.bind(this) },
-            { name: 'get-piers', handler: this.getPiers.bind(this) },
-            { name: 'get-messages', handler: this.getMessages.bind(this) },
-            { name: 'get-pier-auth', handler: this.getPierAuth.bind(this) },
-            { name: 'update-pier', handler: this.updatePier.bind(this) },
-            { name: 'collect-existing-pier', handler: this.collectExistingPier.bind(this) },
-            { name: 'boot-pier', handler: this.bootPier.bind(this) },
-            { name: 'spawn-in-terminal', handler: this.spawnInTerminal.bind(this) },
-            { name: 'check-pier', handler: this.checkPier.bind(this) },
-            { name: 'check-url', handler: this.checkUrlAccessible.bind(this) },
-            { name: 'check-boot', handler: this.checkBoot.bind(this) },
-            { name: 'stop-pier', handler: this.stopPier.bind(this) },
-            { name: 'delete-pier', handler: this.deletePier.bind(this) },
-            { name: 'eject-pier', handler: this.ejectPier.bind(this) },
-            { name: 'validate-key-file', handler: this.validateKeyfile.bind(this) }
+            { name: 'add-pier', handler: this.addPier.bind(this) as Handler},
+            { name: 'get-pier', handler: this.getPier.bind(this)  as Handler},
+            { name: 'get-piers', handler: this.getPiers.bind(this)  as Handler},
+            { name: 'get-messages', handler: this.getMessages.bind(this)  as Handler},
+            { name: 'get-pier-auth', handler: this.getPierAuth.bind(this)  as Handler},
+            { name: 'update-pier', handler: this.updatePier.bind(this)  as Handler},
+            { name: 'collect-existing-pier', handler: this.collectExistingPier.bind(this) as Handler },
+            { name: 'boot-pier', handler: this.bootPier.bind(this) as Handler },
+            { name: 'spawn-in-terminal', handler: this.spawnInTerminal.bind(this)  as Handler},
+            { name: 'check-pier', handler: this.checkPier.bind(this)  as Handler},
+            { name: 'check-url', handler: this.checkUrlAccessible.bind(this)  as Handler},
+            { name: 'check-boot', handler: this.checkBoot.bind(this)  as Handler},
+            { name: 'stop-pier', handler: this.stopPier.bind(this) as Handler },
+            { name: 'delete-pier', handler: this.deletePier.bind(this)  as Handler},
+            { name: 'eject-pier', handler: this.ejectPier.bind(this)  as Handler},
+            { name: 'validate-key-file', handler: this.validateKeyfile.bind(this)  as Handler}
         ]
     }
 
@@ -140,7 +140,7 @@ export class PierService {
         let query = {
             $where: function () {
                 // current log is passed via "this"
-                let stamp = (new Date(this.time)).getTime();
+                let stamp = (new Date(Date.now())).getTime();
                 return THIRTY_DAYS_AGO > stamp;
             }
         };
@@ -192,7 +192,8 @@ export class PierService {
         const runningShips = await this.db.piers.asyncFind({ status: 'running' })
 
         const killWithSignal = true;
-        const stops = []
+        //TODO: remove any type:
+        let stops;
         for (let ship of runningShips) {
             if (ship.type !== 'remote')
                 stops.push(this.stopPier(ship, killWithSignal))
@@ -201,9 +202,9 @@ export class PierService {
         await Promise.all(stops)
     }
 
-    async addPier(pierData: AddPier): Promise<Pier | null> {
+    async addPier(pierData: AddPier): Promise<Pier> {
         const pier = await this.db.piers.asyncInsert({
-            directory: this.pierDirectory,
+            // directory: this.pierDirectory,
             slug: pierSlugify(pierData.name),
             lastUsed: (new Date()).toISOString(),
             status: 'stopped',
@@ -218,11 +219,11 @@ export class PierService {
         return pier;
     }
 
-    async getPier(slug: string): Promise<Pier | null> {
+    async getPier(slug: string): Promise<Pier> {
         return await this.db.piers.asyncFindOne({ slug })
     }
 
-    async getPiers(query?: Partial<Pier>): Promise<Pier[] | null> {
+    async getPiers(query?: Partial<Pier>): Promise<Pier[]> {
         return await this.db.piers.asyncFind(query || {})
     }
 
@@ -239,9 +240,11 @@ export class PierService {
     }
 
     async getPierAuth(pier: Pier): Promise<PierAuth> {
-        if (pier.type === 'remote') {
-            return null;
-        }
+
+        //TODO:
+        // if (pier.type === 'remote') {
+        //     return null;
+        // }
 
         const loopback = `http://localhost:${pier.loopbackPort}`
         const username = await this.dojo(loopback, 'our');
@@ -279,7 +282,8 @@ export class PierService {
             return await res.data
         } catch (err) {
             isDev && console.error(err);
-            return null;
+            // return null;
+            return ""
         }
     }
 
@@ -372,8 +376,9 @@ export class PierService {
         return await this.updatePier(pier.slug, { directory: this.pierDirectory });
     }
 
-    async bootPier(pier: Pier): Promise<Pier | null> {
-        let booting = this.bootingPiers.get(pier.slug);
+    async bootPier(pier: Pier): Promise<Pier | BootingPier | null | undefined> {
+        let booting;
+        booting = this.bootingPiers.get(pier.slug);
         if (booting) {
             return booting;
         }
@@ -389,7 +394,7 @@ export class PierService {
         return booting;
     }
 
-    private async internalBootPier(pier: Pier): Promise<Pier | null> {
+    private async internalBootPier(pier: Pier): Promise<Pier | BootingPier | null | undefined> {
         try {
             const updates: Partial<Pier> = {
                 status: 'booting',
@@ -402,17 +407,19 @@ export class PierService {
 
             const urbit = await this.spawnUrbit(pier);
             const ports = await this.handleUrbitProcess(urbit, pier, true)
-            const updatedPier: Pier = pier.startupPhase !== 'complete'
-                ? await this.handlePostInitialBoot(pier, ports)
-                : await this.handlePostBoot(pier, ports)
+            if (ports) {
+                const updatedPier: Pier = pier.startupPhase !== 'complete'
+                    ? await this.handlePostInitialBoot(pier, ports)
+                    : await this.handlePostBoot(pier, ports)
 
-            this.bootingPiers.delete(updatedPier.slug);
-            return updatedPier;
+                this.bootingPiers.delete(updatedPier.slug);
+                return updatedPier;
+            }
 
         } catch (err) {
             console.error(err);
 
-            if (!this.bootingPiers.get(pier.slug).recoveryAttempted)
+            if (!this.bootingPiers.get(pier.slug)?.recoveryAttempted)
                 return this.tryAutomatedErrorRecovery(pier);
 
             this.bootingPiers.delete(pier.slug);
@@ -420,8 +427,9 @@ export class PierService {
         }
     }
 
-    private async tryAutomatedErrorRecovery(pier: Pier): Promise<Pier | null> {
-        this.bootingPiers.get(pier.slug).recoveryAttempted = true;
+    private async tryAutomatedErrorRecovery(pier: Pier): Promise<Pier | null | undefined> {
+        let foundPier = this.bootingPiers.get(pier.slug);
+        if (foundPier) foundPier.recoveryAttempted = true;
 
         this.db.messageLog.asyncInsert({
             type: 'out',
@@ -490,7 +498,7 @@ export class PierService {
         if (pier.keyFile) {
             try {
                 await asyncRm(pier.keyFile);
-                pierUpdates.keyFile = null;
+                pierUpdates.keyFile = undefined;
             } catch (err) {
                 console.error(err);
                 console.log('Deleting keyfile failed');
@@ -568,12 +576,12 @@ export class PierService {
     }
 
     private async stopUrbit(ship: Pier, stopWithSignal = false): Promise<void> {
-        if (stopWithSignal || (ship.status === 'booting' && typeof ship.pid !== 'undefined')) {
+        if (stopWithSignal || (ship.status === 'booting' && ship.pid != undefined)) {
             try {
-                process.kill(ship.pid, platform === 'win' ? 'SIGINT' : 'SIGTERM');
-            } catch (err) {
+                process.kill(ship.pid as number, platform === 'win' ? 'SIGINT' : 'SIGTERM');
+            } catch (err: any) {
                 // if process somehow doesn't exist (ESRCH), don't throw
-                if (!err.message.toUpperCase().includes('ESRCH')) {
+                if (!err?.message?.toUpperCase().includes('ESRCH')) {
                     throw err;
                 }
             }
@@ -663,12 +671,16 @@ export class PierService {
             ? joinPath(root, ...getPlatformPathSegments(platform), 'resources', platform)
             : joinPath(appRootDir.get(), 'resources', platform);
 
-        const binaryName = readdirSync(platformFolder).find(file => file.includes(arch));
+        let binaryName = readdirSync(platformFolder).find(file => file.includes(arch));
+
+        // If we can't determine the system arch, do we default to  x86_64?
+        if (!binaryName)
+            binaryName = "x86_64";
         this.urbitPath = joinPath(platformFolder, binaryName);
     }
 
     private getSpawnArgs(pier: Pier, interactive = false): string[] {
-        let args = []
+        let args;
         const pierPath = this.getPierPath(pier);
         const neverBooted = pier.startupPhase === 'never-booted';
 
@@ -786,7 +798,7 @@ export class PierService {
     }
 
     private getPierDirectory() {
-        if (process.platform === 'linux' && process.env.SNAP) {
+        if (process.platform === 'linux' && process.env.SNAP && process.env.SNAP_USER_COMMON) {
             return joinPath(process.env.SNAP_USER_COMMON, '.config', ipcRenderer.sendSync('app-name'));
         }
 
@@ -842,7 +854,7 @@ export interface Pier {
 export type AddPier = Pick<Pier, 'name' | 'type' | 'shipName' | 'amesPort' | 'httpPort' | 'httpsPort' | 'keyFile'> & {
     status?: BootStatus;
     startupPhase?: StartupPhase;
-    directory?: string;
+    directory: string;
     directoryAsPierPath?: boolean;
 }
 

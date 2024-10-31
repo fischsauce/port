@@ -157,52 +157,54 @@ module.exports = {
       }
     }
   ],
-  plugins: [
+  plugins:
     [
-      "@electron-forge/plugin-webpack",
       {
-        mainConfig: "./src/main/webpack.main.config.js",
-        renderer: {
-          config: "./src/renderer/webpack.renderer.config.js",
-          nodeIntegration: true,
-          entryPoints: [
-            {
-              name: "main_window",
-              html: "./src/renderer/index.html",
-              js: "./src/renderer/renderer.tsx",
-              preload: {
-                js: "./src/renderer/client/preload.ts"
+        name: '@electron-forge/plugin-webpack',
+        config: {
+          mainConfig: "./src/main/webpack.main.config.js",
+          renderer: {
+            config: "./src/renderer/webpack.renderer.config.js",
+            nodeIntegration: true,
+            entryPoints: [
+              {
+                name: "main_window",
+                html: "./src/renderer/index.html",
+                js: "./src/renderer/renderer.tsx",
+                preload: {
+                  js: "./src/renderer/client/preload.ts"
+                }
+              },
+              {
+                name: "terminal",
+                html: "./src/renderer/terminal/index.html",
+                js: "./src/renderer/terminal/index.tsx",
+                preload: {
+                  js: "./src/renderer/client/preload.ts"
+                }
+              },
+              {
+                html: "./src/background/server/server.html",
+                js: "./src/background/main.ts",
+                name: "background_window"
+              },
+              {
+                html: "./src/renderer/prompt/index.html",
+                js: "./src/renderer/prompt/index.ts",
+                name: "prompt"
+              },
+              {
+                html: "./src/background/server/server.html", //just using for blank
+                js: "./src/renderer/landscape-preload.ts",
+                name: "landscape",
+                preload: {
+                  js: "./src/renderer/landscape-preload.ts"
+                }
               }
-            },
-            {
-              name: "terminal",
-              html: "./src/renderer/terminal/index.html",
-              js: "./src/renderer/terminal/index.tsx",
-              preload: {
-                js: "./src/renderer/client/preload.ts"
-              }
-            },
-            {
-              html: "./src/background/server/server.html",
-              js: "./src/background/main.ts",
-              name: "background_window"
-            },
-            {
-              html: "./src/renderer/prompt/index.html",
-              js: "./src/renderer/prompt/index.ts",
-              name: "prompt"
-            },
-            {
-              html: "./src/background/server/server.html", //just using for blank
-              js: "./src/renderer/landscape-preload.ts",
-              name: "landscape",
-              preload: {
-                js: "./src/renderer/landscape-preload.ts"
-              }
-            }
-          ]
+            ]
+          }
         }
-      }
+      },
     ]
-  ]
+
 }

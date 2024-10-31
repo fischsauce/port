@@ -14,6 +14,8 @@ module.exports = {
         return 'mac';
       case 'win32':
         return 'win';
+      default:
+        return "undetermined"
     }
   },
   getPlatformPathSegments: (platform) => {
