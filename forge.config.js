@@ -158,9 +158,9 @@ module.exports = {
     }
   ],
   plugins: [
-    [
-      "@electron-forge/plugin-webpack",
-      {
+    {
+      name: "@electron-forge/plugin-webpack",
+      config: {
         mainConfig: "./src/main/webpack.main.config.js",
         renderer: {
           config: "./src/renderer/webpack.renderer.config.js",
@@ -193,7 +193,7 @@ module.exports = {
               name: "prompt"
             },
             {
-              html: "./src/background/server/server.html", //just using for blank
+              html: "./src/background/server/server.html",
               js: "./src/renderer/landscape-preload.ts",
               name: "landscape",
               preload: {
@@ -203,6 +203,6 @@ module.exports = {
           ]
         }
       }
-    ]
+    }
   ]
 }
