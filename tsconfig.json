@@ -2,7 +2,7 @@
   "compilerOptions": {
     "allowJs": true,
     "module": "commonjs",
-    "target": "ES2017",
+    "target": "ES2022",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noImplicitAny": false,
@@ -11,7 +11,8 @@
     "outDir": "dist",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "jsx": "react"
+    "jsx": "react",
+    "lib": ["ES2022", "DOM"]
   },
   "include": [
     "src/**/*"
